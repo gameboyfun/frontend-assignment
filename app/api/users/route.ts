@@ -4,7 +4,9 @@ import { groupBy } from 'lodash'
 
 import type { AddressUser, HairColorCount, ResponseDTO, User, UsersResponse } from './types'
 
-export const responseDTO = (users: User[]): ResponseDTO => {
+export const dynamic = 'force-static'
+
+const responseDTO = (users: User[]): ResponseDTO => {
   const groupedByDepartment = groupBy(users, 'company.department')
 
   const response: ResponseDTO = {}
