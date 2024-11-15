@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react'
-import type { List } from './types'
+import type { List, Type } from './types'
 
 export default function useLogic() {
+  const delay = 5000
   const [todoList, setTodoList] = useState<List[]>([
     {
       type: 'Fruit',
@@ -52,6 +53,14 @@ export default function useLogic() {
   const [vegetable, setVegetable] = useState<List[]>([])
   const timeouts = useRef<{ [key: string]: NodeJS.Timeout }>({})
 
+  const removeFromSorted = (type: Type, name: string) => {
+    if (type === 'Fruit') {
+      setFruit((prev) => prev.filter((item) => item.name !== name))
+    } else {
+      setVegetable((prev) => prev.filter((item) => item.name !== name))
+    }
+  }
+
   const handleClick = (item: List) => {
     const { type, name } = item
 
@@ -63,17 +72,13 @@ export default function useLogic() {
       setVegetable((prev) => [...prev, item])
     }
 
+    // delay block
     timeouts.current[name] = setTimeout(() => {
       setTodoList((prev) => [...prev, item])
-
-      if (type === 'Fruit') {
-        setFruit((prev) => prev.filter((item) => item.name !== name))
-      } else {
-        setVegetable((prev) => prev.filter((item) => item.name !== name))
-      }
+      removeFromSorted(type, name)
 
       delete timeouts.current[name]
-    }, 5000)
+    }, delay)
   }
 
   const handleReturn = (item: List) => {
@@ -84,16 +89,8 @@ export default function useLogic() {
       delete timeouts.current[name]
     }
 
-    setTodoList((prev) => [
-      ...prev,
-      ...(type === 'Fruit' ? fruit : vegetable).filter((item) => item.name === name)
-    ])
-
-    if (type === 'Fruit') {
-      setFruit((prev) => prev.filter((item) => item.name !== name))
-    } else {
-      setVegetable((prev) => prev.filter((item) => item.name !== name))
-    }
+    setTodoList((prev) => [...prev, item])
+    removeFromSorted(type, name)
   }
 
   return {
